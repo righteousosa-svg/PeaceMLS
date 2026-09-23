@@ -307,7 +307,7 @@
   @media (max-width:560px){ .gal-grid{ grid-template-columns:1fr; } }
   .gal-item{
     position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--ink-2);
-    border:1px solid var(--line);
+    border:1px solid var(--line); cursor:pointer;
   }
   .gal-item img{
     width:100%; height:100%; object-fit:cover; display:block;
@@ -322,6 +322,41 @@
   .gal-cap{ position:absolute; left:0; right:0; bottom:0; padding:16px 18px; }
   .gal-cap .tag{ font-family:"JetBrains Mono",monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:#e08a5c; text-shadow:0 1px 6px rgba(0,0,0,.8); }
   .gal-cap h4{ font-family:"Fraunces",serif; font-weight:500; font-size:1.05rem; color:var(--paper); margin-top:5px; text-shadow:0 1px 6px rgba(0,0,0,.8); }
+
+  /* Gallery lightbox */
+  .lightbox{
+    position:fixed; inset:0; z-index:300; background:rgba(9,9,8,.96);
+    display:none; align-items:center; justify-content:center; padding:64px 76px;
+  }
+  .lightbox.open{ display:flex; }
+  .lightbox-inner{ position:relative; max-width:1000px; width:100%; display:flex; flex-direction:column; align-items:center; }
+  .lightbox-inner img{ max-width:100%; max-height:64vh; object-fit:contain; border:1px solid var(--line); background:var(--ink-2); }
+  .lightbox-cap{ text-align:center; margin-top:20px; }
+  .lightbox-cap .tag{ font-family:"JetBrains Mono",monospace; font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--rust); }
+  .lightbox-cap h4{ font-family:"Fraunces",serif; font-weight:500; font-size:1.35rem; color:var(--paper); margin-top:6px; }
+  .lightbox-counter{ font-family:"JetBrains Mono",monospace; font-size:.72rem; color:var(--paper-dim); letter-spacing:.05em; margin-top:12px; }
+  .lightbox-close{
+    position:absolute; top:-48px; right:0; background:none; border:none; color:var(--paper);
+    cursor:pointer; padding:8px; transition:color .15s ease;
+  }
+  .lightbox-close:hover{ color:var(--rust); }
+  .lightbox-close svg{ width:24px; height:24px; display:block; }
+  .lightbox-nav{
+    position:fixed; top:50%; transform:translateY(-50%); z-index:301;
+    background:rgba(243,237,224,.08); border:1px solid var(--line-2); color:var(--paper);
+    width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:background .15s ease, border-color .15s ease;
+  }
+  .lightbox-nav:hover{ background:rgba(243,237,224,.16); border-color:var(--paper-dim); }
+  .lightbox-nav svg{ width:22px; height:22px; }
+  .lightbox-prev{ left:18px; }
+  .lightbox-next{ right:18px; }
+  @media (max-width:640px){
+    .lightbox{ padding:70px 14px 26px; }
+    .lightbox-nav{ width:40px; height:40px; }
+    .lightbox-prev{ left:6px; } .lightbox-next{ right:6px; }
+    .lightbox-close{ top:-40px; }
+  }
 
   /* CTA band */
   .cta-band{ text-align:center; padding:100px 0; background:var(--ink-2); border-top:1px solid var(--line); }
@@ -1100,6 +1135,26 @@
   </div>
 </footer>
 
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lightbox-nav lightbox-prev" id="lbPrev" aria-label="Previous photo" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="lightbox-inner">
+    <button class="lightbox-close" id="lbClose" aria-label="Close" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <img id="lbImg" src="" alt="">
+    <div class="lightbox-cap">
+      <span class="tag" id="lbTag"></span>
+      <h4 id="lbTitle"></h4>
+      <div class="lightbox-counter" id="lbCounter"></div>
+    </div>
+  </div>
+  <button class="lightbox-nav lightbox-next" id="lbNext" aria-label="Next photo" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+  </button>
+</div>
+
 <script>
   (function(){
     document.getElementById('yr').textContent = new Date().getFullYear();
@@ -1135,6 +1190,66 @@
     function closeMobile(){ if(mm) mm.classList.remove('open'); document.body.style.overflow=''; }
     document.getElementById('burgerBtn').addEventListener('click', openMobile);
     document.getElementById('mmClose').addEventListener('click', closeMobile);
+  })();
+</script>
+
+<script>
+  (function(){
+    var items = Array.prototype.slice.call(document.querySelectorAll('.gal-item'));
+    var lb = document.getElementById('lightbox');
+    if (!items.length || !lb) return;
+
+    var photos = items.map(function(el){
+      var img = el.querySelector('img');
+      var tagEl = el.querySelector('.gal-cap .tag');
+      var h4El = el.querySelector('.gal-cap h4');
+      return {
+        src: img ? img.getAttribute('src') : '',
+        tag: tagEl ? tagEl.textContent : '',
+        title: h4El ? h4El.textContent : ''
+      };
+    });
+
+    var lbImg = document.getElementById('lbImg');
+    var lbTag = document.getElementById('lbTag');
+    var lbTitle = document.getElementById('lbTitle');
+    var lbCounter = document.getElementById('lbCounter');
+    var current = 0;
+
+    function render(){
+      var p = photos[current];
+      lbImg.src = p.src;
+      lbImg.alt = p.title || p.tag || 'Gallery photo';
+      lbTag.textContent = p.tag;
+      lbTitle.textContent = p.title;
+      lbCounter.textContent = (current + 1) + ' / ' + photos.length;
+    }
+    function openLightbox(i){
+      current = i;
+      render();
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox(){
+      lb.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function showPrev(){ current = (current - 1 + photos.length) % photos.length; render(); }
+    function showNext(){ current = (current + 1) % photos.length; render(); }
+
+    items.forEach(function(el, i){
+      el.addEventListener('click', function(){ openLightbox(i); });
+    });
+    document.getElementById('lbClose').addEventListener('click', closeLightbox);
+    document.getElementById('lbPrev').addEventListener('click', showPrev);
+    document.getElementById('lbNext').addEventListener('click', showNext);
+    lb.addEventListener('click', function(e){ if (e.target === lb) closeLightbox(); });
+    document.addEventListener('keydown', function(e){
+      if (!lb.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft') showPrev();
+      else if (e.key === 'ArrowRight') showNext();
+    });
   })();
 </script>
 
