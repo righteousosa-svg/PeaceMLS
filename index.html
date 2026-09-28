@@ -358,6 +358,42 @@
     .lightbox-close{ top:-40px; }
   }
 
+  /* Quote request modal */
+  .quote-modal{
+    position:fixed; inset:0; z-index:400; background:rgba(9,9,8,.94);
+    display:none; align-items:flex-start; justify-content:center; padding:64px 20px; overflow-y:auto;
+  }
+  .quote-modal.open{ display:flex; }
+  .quote-box{ position:relative; max-width:760px; width:100%; background:var(--ink-2); border:1px solid var(--line); border-radius:3px; padding:42px 40px 36px; }
+  .quote-box .eyebrow{ display:block; }
+  .quote-box h3{ font-family:"Fraunces",serif; font-weight:600; font-size:clamp(1.5rem,3vw,1.9rem); margin-top:10px; }
+  .quote-sub{ color:var(--paper-dim); font-size:.94rem; margin-top:10px; max-width:56ch; }
+  .quote-close{
+    position:absolute; top:18px; right:18px; background:none; border:none; color:var(--paper-dim);
+    cursor:pointer; padding:6px; transition:color .15s ease;
+  }
+  .quote-close:hover{ color:var(--paper); }
+  .quote-close svg{ width:22px; height:22px; display:block; }
+  .quote-form{ margin-top:30px; display:grid; grid-template-columns:1fr 1fr; gap:18px 20px; }
+  .quote-field{ display:flex; flex-direction:column; gap:6px; }
+  .quote-field.full{ grid-column:1 / -1; }
+  .quote-field label{ font-family:"JetBrains Mono",monospace; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
+  .quote-field label .opt{ color:var(--paper-dim); text-transform:none; letter-spacing:0; font-family:"Work Sans",sans-serif; font-size:.72rem; margin-left:4px; }
+  .quote-field input, .quote-field textarea{
+    background:var(--ink); border:1px solid var(--line-2); border-radius:2px; color:var(--paper);
+    font-family:"Work Sans",sans-serif; font-size:.92rem; padding:.7em .8em; resize:vertical;
+  }
+  .quote-field input::placeholder, .quote-field textarea::placeholder{ color:var(--paper-dim); opacity:.55; }
+  .quote-field input:focus, .quote-field textarea:focus{ outline:none; border-color:var(--rust); }
+  .quote-field textarea{ min-height:64px; }
+  .quote-actions{ grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:8px; flex-wrap:wrap; }
+  .quote-note{ color:var(--paper-dim); font-size:.78rem; max-width:34ch; }
+  @media (max-width:640px){
+    .quote-modal{ padding:54px 14px 30px; }
+    .quote-box{ padding:30px 22px 26px; }
+    .quote-form{ grid-template-columns:1fr; }
+  }
+
   /* CTA band */
   .cta-band{ text-align:center; padding:100px 0; background:var(--ink-2); border-top:1px solid var(--line); }
   .cta-band h2{ font-size:clamp(2rem,4vw,3.1rem); max-width:16ch; margin:0 auto; }
@@ -407,7 +443,7 @@
     </nav>
     <div class="nav-cta">
       <a href="#about" class="btn btn-ghost" data-page="about">Our Story</a>
-      <a target="_blank" rel="noopener" href="mailto:dispatch@peacemakerlogistic.com,carrier@peacemakerlogistic.com?subject=Quote%20Request" class="btn btn-primary">Get a Quote</a>
+      <button type="button" id="openQuoteBtn" class="btn btn-primary">Get a Quote</button>
       <button class="burger" id="burgerBtn" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
       </button>
@@ -1155,6 +1191,71 @@
   </button>
 </div>
 
+<div class="quote-modal" id="quoteModal" role="dialog" aria-modal="true" aria-label="Request a quote">
+  <div class="quote-box">
+    <button class="quote-close" id="quoteClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <span class="eyebrow">Request a Quote</span>
+    <h3>Tell us about the load.</h3>
+    <p class="quote-sub">Fill in what you can. This opens a pre-filled email to our dispatch team so you can review it before it sends.</p>
+    <form class="quote-form" id="quoteForm">
+      <div class="quote-field">
+        <label for="qCompany">Company / Name *</label>
+        <input id="qCompany" type="text" required>
+      </div>
+      <div class="quote-field">
+        <label for="qEmail">Email *</label>
+        <input id="qEmail" type="email" required>
+      </div>
+      <div class="quote-field">
+        <label for="qPhone">Phone <span class="opt">optional</span></label>
+        <input id="qPhone" type="tel">
+      </div>
+      <div class="quote-field">
+        <label for="qMc">MC # <span class="opt">if applicable</span></label>
+        <input id="qMc" type="text">
+      </div>
+      <div class="quote-field full">
+        <label for="qCommodity">Commodity *</label>
+        <input id="qCommodity" type="text" placeholder="e.g. steel pipe, machinery, palletized freight" required>
+      </div>
+      <div class="quote-field">
+        <label for="qWeight">Weight *</label>
+        <input id="qWeight" type="text" placeholder="e.g. 19,600 lbs" required>
+      </div>
+      <div class="quote-field">
+        <label for="qLength">Length *</label>
+        <input id="qLength" type="text" placeholder="e.g. 40 ft" required>
+      </div>
+      <div class="quote-field">
+        <label for="qHeight">Height <span class="opt">optional</span></label>
+        <input id="qHeight" type="text" placeholder="e.g. 10 ft">
+      </div>
+      <div class="quote-field">
+        <label for="qPickup">Pickup Location *</label>
+        <input id="qPickup" type="text" placeholder="City, State" required>
+      </div>
+      <div class="quote-field">
+        <label for="qDelivery">Delivery Location *</label>
+        <input id="qDelivery" type="text" placeholder="City, State" required>
+      </div>
+      <div class="quote-field full">
+        <label for="qEquipment">Equipment Needed <span class="opt">optional</span></label>
+        <input id="qEquipment" type="text" placeholder="e.g. flatbed, lowboy, RGN, tarps required">
+      </div>
+      <div class="quote-field full">
+        <label for="qNotes">Anything else? <span class="opt">optional</span></label>
+        <textarea id="qNotes"></textarea>
+      </div>
+      <div class="quote-actions">
+        <span class="quote-note">Opens in your email app, addressed to dispatch. Nothing sends until you do.</span>
+        <button type="submit" class="btn btn-primary">Send Request</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   (function(){
     document.getElementById('yr').textContent = new Date().getFullYear();
@@ -1249,6 +1350,56 @@
       if (e.key === 'Escape') closeLightbox();
       else if (e.key === 'ArrowLeft') showPrev();
       else if (e.key === 'ArrowRight') showNext();
+    });
+  })();
+</script>
+
+<script>
+  (function(){
+    var openBtn = document.getElementById('openQuoteBtn');
+    var modal = document.getElementById('quoteModal');
+    var closeBtn = document.getElementById('quoteClose');
+    var form = document.getElementById('quoteForm');
+    if (!openBtn || !modal || !form) return;
+
+    function openModal(){ modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeModal(){ modal.classList.remove('open'); document.body.style.overflow = ''; }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function(e){
+      if (modal.classList.contains('open') && e.key === 'Escape') closeModal();
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      function val(id){ return document.getElementById(id).value.trim(); }
+      var lines = [
+        'Company / Name: ' + val('qCompany'),
+        'Email: ' + val('qEmail'),
+        'Phone: ' + (val('qPhone') || '—'),
+        'MC #: ' + (val('qMc') || '—'),
+        '',
+        'Commodity: ' + val('qCommodity'),
+        'Weight: ' + val('qWeight'),
+        'Length: ' + val('qLength'),
+        'Height: ' + (val('qHeight') || '—'),
+        '',
+        'Pickup Location: ' + val('qPickup'),
+        'Delivery Location: ' + val('qDelivery'),
+        'Equipment Needed: ' + (val('qEquipment') || '—'),
+        '',
+        'Additional Notes: ' + (val('qNotes') || '—')
+      ];
+      var subject = 'Quote Request — ' + val('qCompany');
+      var body = lines.join('\n');
+      var mailto = 'mailto:dispatch@peacemakerlogistic.com,carrier@peacemakerlogistic.com'
+        + '?subject=' + encodeURIComponent(subject)
+        + '&body=' + encodeURIComponent(body);
+      window.location.href = mailto;
+      closeModal();
+      form.reset();
     });
   })();
 </script>
