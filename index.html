@@ -1001,7 +1001,7 @@
       <span class="eyebrow">Work With Our Dispatcher</span>
       <h2 style="margin-top:16px;">Let&rsquo;s see if we&rsquo;re a fit for your truck.</h2>
       <div class="hero-actions">
-        <button type="button" class="btn btn-primary open-quote">Get a Quote</button>
+        <button type="button" class="btn btn-primary open-dispatch">Get a Quote</button>
         <a target="_blank" rel="noopener" href="tel:9453940128" class="btn btn-ghost">945.394.0128</a>
       </div>
     </div>
@@ -1345,6 +1345,126 @@
       if (e.key === 'Escape') closeLightbox();
       else if (e.key === 'ArrowLeft') showPrev();
       else if (e.key === 'ArrowRight') showNext();
+    });
+  })();
+</script>
+
+<div class="quote-modal" id="dispatchModal" role="dialog" aria-modal="true" aria-label="Dispatch inquiry">
+  <div class="quote-box">
+    <button class="quote-close" id="dispatchClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <span class="eyebrow">Dispatch Services</span>
+    <h3>Tell us about your truck.</h3>
+    <p class="quote-sub">Share your company and equipment details so we can see if we&rsquo;re a fit. This opens a pre-filled email to our dispatch team so you can review it before it sends.</p>
+    <form class="quote-form" id="dispatchForm">
+      <div class="quote-field">
+        <label for="dCompany">Company Name *</label>
+        <input id="dCompany" type="text" required>
+      </div>
+      <div class="quote-field">
+        <label for="dName">Your Name *</label>
+        <input id="dName" type="text" required>
+      </div>
+      <div class="quote-field">
+        <label for="dEmail">Email *</label>
+        <input id="dEmail" type="email" required>
+      </div>
+      <div class="quote-field">
+        <label for="dPhone">Phone *</label>
+        <input id="dPhone" type="tel" required>
+      </div>
+      <div class="quote-field">
+        <label for="dMc">MC # *</label>
+        <input id="dMc" type="text" required>
+      </div>
+      <div class="quote-field">
+        <label for="dDot">DOT # <span class="opt">optional</span></label>
+        <input id="dDot" type="text">
+      </div>
+      <div class="quote-field">
+        <label for="dEquip">Equipment Type *</label>
+        <input id="dEquip" type="text" list="dEquipList" placeholder="e.g. hotshot, flatbed, box truck" required>
+        <datalist id="dEquipList">
+          <option value="Hotshot (gooseneck)"></option>
+          <option value="Flatbed"></option>
+          <option value="Step deck"></option>
+          <option value="Box truck"></option>
+          <option value="Dry van"></option>
+          <option value="Power only"></option>
+        </datalist>
+      </div>
+      <div class="quote-field">
+        <label for="dCount">Number of Trucks *</label>
+        <input id="dCount" type="text" placeholder="e.g. 2" required>
+      </div>
+      <div class="quote-field full">
+        <label for="dSpecs">Equipment Specs <span class="opt">optional</span></label>
+        <textarea id="dSpecs" placeholder="Trailer length, deck size, weight capacity, tarps/straps/chains, etc."></textarea>
+      </div>
+      <div class="quote-field full">
+        <label for="dLocation">Current Location *</label>
+        <input id="dLocation" type="text" placeholder="City, State" required>
+      </div>
+      <div class="quote-field full">
+        <label for="dLanes">Preferred Lanes *</label>
+        <input id="dLanes" type="text" placeholder="e.g. Dallas to Houston, TX to Oklahoma, regional only" required>
+      </div>
+      <div class="quote-field full">
+        <label for="dNotes">Anything else? <span class="opt">optional</span></label>
+        <textarea id="dNotes"></textarea>
+      </div>
+      <div class="quote-actions">
+        <span class="quote-note">Opens in your email app, addressed to our dispatch team. Nothing sends until you do.</span>
+        <button type="submit" class="btn btn-primary">Send Request</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var modal = document.getElementById('dispatchModal');
+    var form = document.getElementById('dispatchForm');
+    if (!modal || !form) return;
+
+    function openModal(){ modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeModal(){ modal.classList.remove('open'); document.body.style.overflow = ''; }
+
+    document.querySelectorAll('.open-dispatch').forEach(function(b){ b.addEventListener('click', openModal); });
+    document.getElementById('dispatchClose').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function(e){
+      if (modal.classList.contains('open') && e.key === 'Escape') closeModal();
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      function val(id){ return document.getElementById(id).value.trim(); }
+      var lines = [
+        'Company: ' + val('dCompany'),
+        'Contact Name: ' + val('dName'),
+        'Email: ' + val('dEmail'),
+        'Phone: ' + val('dPhone'),
+        'MC #: ' + val('dMc'),
+        'DOT #: ' + (val('dDot') || '—'),
+        '',
+        'Equipment Type: ' + val('dEquip'),
+        'Number of Trucks: ' + val('dCount'),
+        'Equipment Specs: ' + (val('dSpecs') || '—'),
+        '',
+        'Current Location: ' + val('dLocation'),
+        'Preferred Lanes: ' + val('dLanes'),
+        '',
+        'Additional Notes: ' + (val('dNotes') || '—')
+      ];
+      var subject = 'Dispatch Inquiry — ' + val('dCompany');
+      var mailto = 'mailto:dispatch@peacemakerlogistic.com,carrier@peacemakerlogistic.com'
+        + '?subject=' + encodeURIComponent(subject)
+        + '&body=' + encodeURIComponent(lines.join('\n'));
+      window.location.href = mailto;
+      closeModal();
+      form.reset();
     });
   })();
 </script>
