@@ -493,7 +493,7 @@
       <p class="hero-sub">Peacemaker Logistic Solutions delivers time-critical freight with precision and peace in every mile — fast, reliable hotshot transportation for commercial and industrial clients across North Texas and beyond.</p>
       <div class="hero-actions">
         <a href="#hotshot" class="btn btn-primary" data-page="hotshot">View Our Solutions</a>
-        <a target="_blank" rel="noopener" href="mailto:dispatch@peacemakerlogistic.com,carrier@peacemakerlogistic.com?subject=Load%20Inquiry" class="btn btn-ghost">Book a Load</a>
+        <button type="button" class="btn btn-ghost open-quote">Book a Load</button>
       </div>
       <div class="placard">
         <div class="placard-item"><div class="k">Carrier</div><div class="v">Peacemaker Logistic Solutions LLC</div></div>
@@ -628,7 +628,7 @@
       <h2 style="margin-top:16px;">Let&rsquo;s get your freight moving.</h2>
       <p>Reach out to dispatch with your pickup, delivery, and timeline — we&rsquo;ll take it from there.</p>
       <div class="hero-actions">
-        <a target="_blank" rel="noopener" href="mailto:dispatch@peacemakerlogistic.com" class="btn btn-primary">dispatch@peacemakerlogistic.com</a>
+        <button type="button" class="btn btn-primary open-quote">Book a Load</button>
         <a target="_blank" rel="noopener" href="tel:9453940128" class="btn btn-ghost">945.394.0128</a>
       </div>
     </div>
@@ -858,7 +858,7 @@
       <span class="eyebrow">Got a Load Like This?</span>
       <h2 style="margin-top:16px;">Let&rsquo;s get it on the trailer.</h2>
       <div class="hero-actions">
-        <a target="_blank" rel="noopener" href="mailto:dispatch@peacemakerlogistic.com" class="btn btn-primary">dispatch@peacemakerlogistic.com</a>
+        <button type="button" class="btn btn-primary open-quote">Book a Load</button>
         <a target="_blank" rel="noopener" href="tel:9453940128" class="btn btn-ghost">945.394.0128</a>
       </div>
     </div>
@@ -943,7 +943,7 @@
       <span class="eyebrow">Book a Hotshot Load</span>
       <h2 style="margin-top:16px;">Have a load that needs to move now?</h2>
       <div class="hero-actions">
-        <a target="_blank" rel="noopener" href="mailto:dispatch@peacemakerlogistic.com" class="btn btn-primary">dispatch@peacemakerlogistic.com</a>
+        <button type="button" class="btn btn-primary open-quote">Book a Load</button>
         <a target="_blank" rel="noopener" href="tel:9453940128" class="btn btn-ghost">945.394.0128</a>
       </div>
     </div>
@@ -1066,7 +1066,7 @@
       <span class="eyebrow">Move Your Freight</span>
       <h2 style="margin-top:16px;">Tell us what needs to ship, and where.</h2>
       <div class="hero-actions">
-        <a target="_blank" rel="noopener" href="mailto:dispatch@peacemakerlogistic.com" class="btn btn-primary">dispatch@peacemakerlogistic.com</a>
+        <button type="button" class="btn btn-primary open-quote">Book a Load</button>
         <a target="_blank" rel="noopener" href="tel:9453940128" class="btn btn-ghost">945.394.0128</a>
       </div>
     </div>
@@ -1360,6 +1360,7 @@
     function openModal(){ modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
     function closeModal(){ modal.classList.remove('open'); document.body.style.overflow = ''; }
 
+    document.querySelectorAll('.open-quote').forEach(function(b){ b.addEventListener('click', openModal); });
     openBtn.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
